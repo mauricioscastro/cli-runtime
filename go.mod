@@ -72,4 +72,5 @@ replace (
 	k8s.io/api => k8s.io/api v0.28.2
 	k8s.io/apimachinery => k8s.io/apimachinery v0.28.2
 	k8s.io/client-go => k8s.io/client-go v0.28.2
+	k8s.io/cli-runtime => github.com/mauricioscastro/cli-runtime v0.28.202
 )
