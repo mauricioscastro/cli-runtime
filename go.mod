@@ -1,4 +1,4 @@
-// This is a generated file. Do not edit directly.
+// This is a generated file. Do not et directly.
 
 module k8s.io/cli-runtime
 

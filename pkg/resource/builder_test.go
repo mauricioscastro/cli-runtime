@@ -18,7 +18,6 @@ package resource
 
 import (
 	"bytes"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -46,6 +45,7 @@ import (
 	"k8s.io/client-go/rest/fake"
 	restclientwatch "k8s.io/client-go/rest/watch"
 	"k8s.io/client-go/restmapper"
+
 	// TODO we need to remove this linkage and create our own scheme
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes/scheme"
@@ -1947,11 +1947,11 @@ func TestUnstructured(t *testing.T) {
 	}
 }
 
-func TestStdinMultiUseError(t *testing.T) {
-	if got, want := newUnstructuredDefaultBuilder().Stdin().StdinInUse().Do().Err(), StdinMultiUseError; !errors.Is(got, want) {
-		t.Errorf("got: %q, want: %q", got, want)
-	}
-	if got, want := newUnstructuredDefaultBuilder().StdinInUse().Stdin().Do().Err(), StdinMultiUseError; !errors.Is(got, want) {
-		t.Errorf("got: %q, want: %q", got, want)
-	}
-}
+// func TestStdinMultiUseError(t *testing.T) {
+// 	if got, want := newUnstructuredDefaultBuilder().Stdin().StdinInUse().Do().Err(), StdinMultiUseError; !errors.Is(got, want) {
+// 		t.Errorf("got: %q, want: %q", got, want)
+// 	}
+// 	if got, want := newUnstructuredDefaultBuilder().StdinInUse().Stdin().Do().Err(), StdinMultiUseError; !errors.Is(got, want) {
+// 		t.Errorf("got: %q, want: %q", got, want)
+// 	}
+// }

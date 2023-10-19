@@ -493,8 +493,9 @@ func ignoreFile(path string, extensions []string) bool {
 }
 
 // FileVisitorForSTDIN return a special FileVisitor just for STDIN
-func FileVisitorForSTDIN(mapper *mapper, schema ContentValidator) Visitor {
+func FileVisitorForSTDIN(mapper *mapper, schema ContentValidator, fakeStdin io.Reader) Visitor {
 	return &FileVisitor{
+		FakeStdin:     fakeStdin,
 		Path:          constSTDINstr,
 		StreamVisitor: NewStreamVisitor(nil, mapper, constSTDINstr, schema),
 	}
@@ -540,26 +541,36 @@ func ExpandPathsToFileVisitors(mapper *mapper, paths string, recursive bool, ext
 type FileVisitor struct {
 	Path string
 	*StreamVisitor
+	FakeStdin io.Reader
 }
 
 // Visit in a FileVisitor is just taking care of opening/closing files
 func (v *FileVisitor) Visit(fn VisitorFunc) error {
-	var f *os.File
-	if v.Path == constSTDINstr {
-		f = os.Stdin
-	} else {
-		var err error
-		f, err = os.Open(v.Path)
-		if err != nil {
-			return err
+	var (
+		f *os.File
+		r io.Reader
+	)
+
+	if v.FakeStdin == nil {
+		if v.Path == constSTDINstr {
+			f = os.Stdin
+		} else {
+			var err error
+			f, err = os.Open(v.Path)
+			if err != nil {
+				return err
+			}
+			defer f.Close()
 		}
-		defer f.Close()
+		r = f
+	} else {
+		r = v.FakeStdin
 	}
 
 	// TODO: Consider adding a flag to force to UTF16, apparently some
 	// Windows tools don't write the BOM
 	utf16bom := unicode.BOMOverride(unicode.UTF8.NewDecoder())
-	v.StreamVisitor.Reader = transform.NewReader(f, utf16bom)
+	v.StreamVisitor.Reader = transform.NewReader(r, utf16bom)
 
 	return v.StreamVisitor.Visit(fn)
 }
