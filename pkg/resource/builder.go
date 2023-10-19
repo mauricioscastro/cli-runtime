@@ -248,7 +248,7 @@ func (b *Builder) VisitorConcurrency(concurrency int) *Builder {
 // will cause an error.
 // If ContinueOnError() is set prior to this method, objects on the path that are not
 // recognized will be ignored (but logged at V(2)).
-func (b *Builder) FilenameParam(enforceNamespace bool, filenameOptions *FilenameOptions) *Builder {
+func (b *Builder) FilenameParam(enforceNamespace bool, filenameOptions *FilenameOptions, fakeStdin ...io.Reader) *Builder {
 	if errs := filenameOptions.validate(); len(errs) > 0 {
 		b.errs = append(b.errs, errs...)
 		return b
@@ -258,7 +258,11 @@ func (b *Builder) FilenameParam(enforceNamespace bool, filenameOptions *Filename
 	for _, s := range paths {
 		switch {
 		case s == "-":
-			b.Stdin()
+			if len(fakeStdin) > 0 && fakeStdin[0] != nil {
+				b.Stdin(fakeStdin[0])
+			} else {
+				b.Stdin(nil)
+			}
 		case strings.Index(s, "http://") == 0 || strings.Index(s, "https://") == 0:
 			url, err := url.Parse(s)
 			if err != nil {
@@ -385,13 +389,15 @@ func (b *Builder) URL(httpAttemptCount int, urls ...*url.URL) *Builder {
 // will be ignored (but logged at V(2)). If StdinInUse() is set prior to this method
 // being called, an error will be recorded as there are multiple entities trying to use
 // the single standard input stream.
-func (b *Builder) Stdin() *Builder {
+func (b *Builder) Stdin(fakeStdin io.Reader) *Builder {
 	b.stream = true
-	if b.stdinInUse {
-		b.errs = append(b.errs, StdinMultiUseError)
+	if fakeStdin == nil {
+		if b.stdinInUse {
+			b.errs = append(b.errs, StdinMultiUseError)
+		}
+		b.stdinInUse = true
 	}
-	b.stdinInUse = true
-	b.paths = append(b.paths, FileVisitorForSTDIN(b.mapper, b.schema))
+	b.paths = append(b.paths, FileVisitorForSTDIN(b.mapper, b.schema, fakeStdin))
 	return b
 }
 
