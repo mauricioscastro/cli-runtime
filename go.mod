@@ -1,6 +1,6 @@
 // This is a generated file. Do not et directly.
 
-module k8s.io/cli-runtime
+module github.com/mauricioscastro/cli-runtime
 
 go 1.20
 
@@ -74,4 +74,5 @@ replace (
 	k8s.io/api => k8s.io/api v0.0.0-20231016230927-b01b44926aa4
 	k8s.io/apimachinery => k8s.io/apimachinery v0.0.0-20231016230655-a1b8da8152f9
 	k8s.io/client-go => k8s.io/client-go v0.0.0-20231016231308-435ce6f2a8ef
+	k8s.io/cli-runtime => github.com/mauricioscastro/cli-runtime v0.28.201
 )
